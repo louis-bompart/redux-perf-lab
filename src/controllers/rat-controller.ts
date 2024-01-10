@@ -1,11 +1,13 @@
 import { Controller, buildController } from "./base-controller.js";
 import {
+  ComplexRatProperty,
   complexRatPropertySelector,
   simpleRatPropertySelector,
 } from "../selectors/rat-selector.js";
-import { Store } from "../store/store.js";
+import { GlobalState, Store } from "../store/store.js";
 import { ratReducer } from "../reducers/rat-slice.js";
 import { ratAction } from "../actions/rat-actions.js";
+import { createSelector } from "@reduxjs/toolkit";
 
 interface RatState {
   simpleProperty: string;
@@ -26,27 +28,33 @@ export function buildRat(store: Store): RatController {
   // Simplification, in Headless we would use the reducer manager.
   store.replaceReducer(ratReducer);
 
-  const getSimpleProperty = (store: Store) =>
-    simpleRatPropertySelector(store.getState());
-  const getComplexProperty = (store: Store) =>
-    complexRatPropertySelector(store.getState());
+  const getSimpleProperty = (state: GlobalState) =>
+    simpleRatPropertySelector(state);
+  const getComplexProperty = (state: GlobalState) =>
+    complexRatPropertySelector(state);
 
-  const computeState = (store: Store): RatState => ({
-    simpleProperty: getSimpleProperty(store),
-    complexProperty: getComplexProperty(store),
-  });
+  const computeState = createSelector(
+    [getSimpleProperty, getComplexProperty],
+    (
+      simpleProperty: string,
+      complexProperty: ComplexRatProperty
+    ): RatState => ({
+      simpleProperty,
+      complexProperty,
+    })
+  );
 
   return {
     ...controller,
 
     get state() {
-      return computeState(store);
+      return computeState(store.getState());
     },
 
     isThisSimpleProp(this: RatController, value: string) {
       return this.state.simpleProperty === value;
     },
-    
+
     setProp(key, value) {
       store.dispatch(ratAction(key, value));
     },
