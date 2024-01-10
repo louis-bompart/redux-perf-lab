@@ -13,7 +13,7 @@ const store = configureStore<GlobalState>({ reducer: identiyReducer });
 const rat = buildRat(store);
 const promiseFunction = (resolve) => {
   let calls = 0;
-  const propChangesCycleCount = 1e2;
+  const propChangesCycleCount = 1e3;
   const setPropPerCycle = 3;
   const targetCalls = propChangesCycleCount * setPropPerCycle;
   rat.subscribe(() => {
