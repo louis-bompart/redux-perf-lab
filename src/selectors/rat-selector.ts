@@ -1,9 +1,19 @@
+import { createSelector } from "@reduxjs/toolkit";
 import { GlobalState } from "../store/store.js";
 
 export interface ComplexRatProperty {
-    ef: string;
-    c: string;
+  ef: string;
+  c: string;
 }
 
-export const simpleRatPropertySelector = (state: GlobalState): string => state.a;
-export const complexRatPropertySelector = (state: GlobalState): ComplexRatProperty => ({ef: `${state.d.e} ${state.d.f}`, c: state.c});
+export const simpleRatPropertySelector = (state: GlobalState): string =>
+  state.a;
+
+export const complexRatPropertySelector = createSelector(
+  [
+    (state: GlobalState) => state.c,
+    (state: GlobalState) => state.d.e,
+    (state: GlobalState) => state.d.f,
+  ],
+  (c, e, f): ComplexRatProperty => ({ ef: `${e} ${f}`, c: c })
+);

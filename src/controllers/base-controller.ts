@@ -16,23 +16,14 @@ export interface Controller extends Subscribable {
 }
 
 export function buildController(store: Store): Controller {
-  let prevState: string;
+  let prevState: unknown;
   const listeners: Map<Symbol, () => void> = new Map();
   const hasNoListeners = () => listeners.size === 0;
 
-  const hasStateChanged = (currentState: Record<string, unknown>): boolean => {
-    try {
-      const stringifiedState = JSON.stringify(currentState);
-      const hasChanged = prevState !== stringifiedState;
-      prevState = stringifiedState;
-      return hasChanged;
-    } catch (e) {
-      console.warn(
-        'Could not detect if state has changed, check the controller "get state method"',
-        e
-      );
-      return true;
-    }
+  const hasStateChanged = (currentState: unknown): boolean => {
+    const hasChanged = prevState !== currentState;
+    prevState = currentState;
+    return hasChanged;
   };
 
   return {
@@ -42,7 +33,7 @@ export function buildController(store: Store): Controller {
       let unsubscribe: () => void;
 
       if (hasNoListeners()) {
-        prevState = JSON.stringify(this.state);
+        prevState = this.state;
         unsubscribe = store.subscribe(() => {
           if (hasStateChanged(this.state)) {
             listeners.forEach((listener) => listener());
